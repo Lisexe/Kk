@@ -1,0 +1,1524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Документация</title>
+    <link rel="stylesheet" href="main.css">
+</head>
+<body>
+    <div class="element">
+    <h1>Пример 0</h1>
+    <textarea readonly>
+CREATE DATABASE myDE;
+USE myDE;
+
+CREATE TABLE part_types (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    type_name VARCHAR(50) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE partners (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    partner_type_id INT NOT NULL,
+    company_name VARCHAR(255) NOT NULL,
+    director_name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    phone VARCHAR(20) NOT NULL,
+    legal_address TEXT NOT NULL,
+    inn VARCHAR(12) NOT NULL UNIQUE,
+    rating INT NOT NULL DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (partner_type_id) REFERENCES part_types(id)
+);
+
+CREATE TABLE prod_types (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    type_name VARCHAR(100) NOT NULL,
+    coefficient DECIMAL(10,3) NOT NULL DEFAULT 1.000,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE products (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    product_type_id INT NOT NULL,
+    product_name VARCHAR(255) NOT NULL,
+    article VARCHAR(50) NOT NULL UNIQUE,
+    min_partner_price DECIMAL(10,2) NOT NULL,
+    stock_quantity INT NOT NULL DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (product_type_id) REFERENCES prod_types(id)
+);
+
+CREATE TABLE mat_types (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    type_name VARCHAR(100) NOT NULL,
+    defect_percentage DECIMAL(5,3) NOT NULL DEFAULT 0.000,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE orders (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    partner_id INT NOT NULL,
+    order_date DATE NOT NULL,
+    total_cost DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+    status ENUM('new', 'confirmed', 'production', 'completed', 'cancelled') DEFAULT 'new',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (partner_id) REFERENCES partners(id)
+);
+
+CREATE TABLE order_items (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    order_id INT NOT NULL,
+    product_id INT NOT NULL,
+    quantity INT NOT NULL,
+    unit_price DECIMAL(10,2) NOT NULL,
+    total_price DECIMAL(10,2) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
+    FOREIGN KEY (product_id) REFERENCES products(id)
+);
+
+INSERT INTO part_types (type_name) VALUES 
+('ЗАО'), ('ООО'), ('ПАО'), ('ОАО');
+
+INSERT INTO prod_types (type_name, coefficient) VALUES 
+('Древесно-плитные материалы', 1.5),
+('Декоративные панели', 3.5),
+('Плитка', 5.25),
+('Фасадные материалы', 4.5),
+('Напольные покрытия', 2.17);
+
+INSERT INTO mat_types (type_name, defect_percentage) VALUES 
+('Тип материала 1', 0.200),
+('Тип материала 2', 0.500),
+('Тип материала 3', 0.300),
+('Тип материала 4', 0.150),
+('Тип материала 5', 0.180);
+
+INSERT INTO partners (partner_type_id, company_name, director_name, email, phone, legal_address, inn, rating) VALUES 
+(1, 'БетонСнаб', 'Кузнецова Марина Анатольевна', 'm.kuznetsova@betonsnab.ru', '499 123 45 67', '115432, г. Москва, ул. Промышленная, д. 5', '7712345678', 6),
+(1, 'ГарантСтрой', 'Фролов Олег Дмитриевич', 'oleg.frolov@garantstroy.ru', '812 987 65 43', '190000, г. Санкт-Петербург, ул. Строителей, д. 10', '7801456732', 4),
+(2, 'ЛесМастер', 'Тимофеева Ирина Васильевна', 'i.timofeeva@lesmaster.ru', '843 210 11 22', '420111, Республика Татарстан, г. Казань, ул. Лесная, д. 3', '1658329904', 5),
+(2, 'ЭкоДекор', 'Павлов Николай Игоревич', 'n.pavlov@ecodecor.ru', '383 456 78 90', '630000, Новосибирская область, г. Новосибирск, ул. Центральная, д. 18', '5403981120', 6),
+(2, 'Теплый Дом', 'Зайцева Алёна Романовна', 'a.zaytseva@teplydom.ru', '347 321 44 55', '450078, Республика Башкортостан, г. Уфа, ул. Октября, д. 25', '0278123456', 7),
+(3, 'УютПро', 'Громов Виктор Алексеевич', 'v.gromov@uyutpro.ru', '863 101 22 33', '344038, Ростовская область, г. Ростов-на-Дону, ул. Комсомольская, д. 9', '6165161781', 8),
+(1, 'АртПанель', 'Соколова Лидия Петровна', 'l.sokolova@artpanel.ru', '495 404 00 11', '141008, Московская область, г. Мытищи, ул. Садовая, д. 7', '5032109876', 5),
+(3, 'МастерДом', 'Никитин Артём Сергеевич', 'a.nikitin@masterdom.ru', '351 678 33 22', '454000, Челябинская область, г. Челябинск, ул. Гагарина, д. 14', '7451002399', 6),
+(2, 'ОтделКом', 'Воронцова Елена Валерьевна', 'e.vorontsova@otdelkom.ru', '861 222 55 66', '350000, Краснодарский край, г. Краснодар, ул. Кирова, д. 12', '2311345790', 7),
+(1, 'ТехноПроф', 'Орлов Сергей Николаевич', 's.orlov@technoprof.ru', '8412 567 89 01', '440000, Пензенская область, г. Пенза, ул. Карла Маркса, д. 3', '5839007812', 5);
+
+INSERT INTO products (product_type_id, product_name, article, min_partner_price, stock_quantity) VALUES 
+(1, 'Плита OSB-3 влагостойкая 2500x1250x15 мм', '8721345', 3890.00, 140),
+(2, 'Панель настенная МДФ Ретро 600x300x10 мм цвет серый', '7902345', 1985.00, 180),
+(1, 'Керамогранит Песчаник 30x30 см бежевый', '5001287', 2150.00, 280),
+(3, 'Плитка настенная Блик 20x20 см цвет кремовый глянец', '8012349', 2450.00, 160),
+(5, 'Ламинат Ясень Грей 33 класс толщина 8 мм с фаской', '9298342', 4120.00, 100),
+(2, 'Стеновая панель МДФ Вудлайн 2700x600x12 мм', '7134579', 2200.00, 90),
+(1, 'Декоративный камень Гранит серый 25x10 см', '5041248', 2890.00, 230),
+(5, 'Ламинат Винтаж Дизайн 32 класс толщина 10 мм с фаской', '9678543', 3350.00, 145),
+(1, 'Плита ДСП влагостойкая 16 мм 1830x2750 мм', '6031452', 520.00, 750),
+(5, 'Ламинат Шпон Дуб натуральный 33 класс 7 мм', '9187542', 3790.00, 170),
+(3, 'Плитка настенная Вена 25x75 см цвет голубой', '8589023', 2590.00, 195),
+(1, 'Плита ДСП Арктика 18 мм 1200x900 мм', '6782145', 1090.00, 360),
+(2, 'Стеновая панель МДФ Орех 60x300x5 мм цвет серый', '7762435', 1750.00, 70),
+(1, 'Клинкерная плитка черная 30x30 см матовая', '5120033', 880.00, 290),
+(3, 'Плитка настенная Орхидея 60x120 см цвет сиреневый', '8563247', 2390.00, 170),
+(2, 'Настенное покрытие из пробки 600x300x4 мм цвет серый', '7261782', 3420.00, 80),
+(3, 'Плитка настенная Сканди 30x60 см цвет светло-бежевый', '8123948', 1690.00, 200),
+(1, 'Гипсовая плитка интерьерная Лофт белая 20x5 см', '5044120', 519.00, 420),
+(5, 'Ламинат Берёза снежная 32 класс толщина 8 мм', '9036785', 2620.00, 135),
+(1, 'Декоративная плитка Венге 1200x200x4 мм коричневая', '6132147', 920.00, 175);
+    </textarea>
+    </div>
+
+<br><br>
+
+    <div class="element">
+    <h1>Доп материал 1</h1>
+    <textarea readonly>
+INSERT INTO orders (partner_id, order_date, total_cost, status) VALUES 
+(1, '2024-01-15', 25500.00, 'completed'),
+(2, '2024-01-20', 18900.00, 'completed'),
+(3, '2024-02-10', 32400.00, 'production'),
+(4, '2024-02-15', 45200.00, 'confirmed'),
+(5, '2024-02-28', 15750.00, 'new'),
+(6, '2024-03-05', 28600.00, 'production'),
+(7, '2024-03-10', 19800.00, 'completed'),
+(8, '2024-03-15', 36700.00, 'confirmed'),
+(9, '2024-03-20', 22100.00, 'new'),
+(10, '2024-03-25', 41200.00, 'production');
+
+INSERT INTO order_items (order_id, product_id, quantity, unit_price, total_price) VALUES 
+(1, 1, 2000, 5100.00, 10200.00), (1, 3, 3000, 2080.00, 6240.00), (1, 5, 1000, 4050.00, 4050.00),
+(2, 2, 9500, 1880.00, 17860.00), (2, 4, 2000, 2500.00, 5000.00),
+(3, 6, 1100, 2100.56, 2310.62), (3, 8, 5000, 3200.96, 16004.80),
+(4, 10, 2500, 3750.00, 9375.00), (4, 12, 6000, 1050.96, 6305.76),
+(5, 14, 7000, 860.00, 6020.00), (5, 16, 2500, 3300.00, 8250.00);
+
+CREATE INDEX idx_partners_type ON partners(partner_type_id);
+CREATE INDEX idx_partners_inn ON partners(inn);
+CREATE INDEX idx_products_type ON products(product_type_id);
+CREATE INDEX idx_orders_partner ON orders(partner_id);
+CREATE INDEX idx_orders_date ON orders(order_date);
+CREATE INDEX idx_order_items_order ON order_items(order_id);
+CREATE INDEX idx_order_items_product ON order_items(product_id);
+
+CREATE VIEW order_summary AS
+SELECT 
+    o.id as order_id,
+    p.company_name,
+    pt.type_name as partner_type,
+    o.order_date,
+    o.total_cost,
+    o.status,
+    COUNT(oi.id) as items_count
+FROM orders o
+JOIN partners p ON o.partner_id = p.id
+JOIN part_types pt ON p.partner_type_id = pt.id
+LEFT JOIN order_items oi ON o.id = oi.order_id
+GROUP BY o.id, p.company_name, pt.type_name, o.order_date, o.total_cost, o.status;
+    </textarea>
+    </div>
+
+<br><br>
+
+ <div class="element">
+    <h1>Пример оформления</h1>
+    <textarea readonly>
+ <?php
+require_once 'config.php';
+
+$action = $_GET['action'] ?? 'list';
+$message = '';
+$error = '';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (isset($_POST['add_order'])) {
+        $errors = validateOrder($_POST);
+        if (empty($errors)) {
+            if (addOrder($_POST)) {
+                $message = 'Заявка успешно добавлена!';
+                $action = 'list';
+            } else {
+                $error = 'Ошибка при добавлении заявки';
+            }
+        }
+    } elseif (isset($_POST['update_order'])) {
+        $errors = validateOrder($_POST, $_POST['id']);
+        if (empty($errors)) {
+            if (updateOrder($_POST['id'], $_POST)) {
+                $message = 'Заявка успешно обновлена!';
+                $action = 'list';
+            } else {
+                $error = 'Ошибка при обновлении заявки';
+            }
+        }
+    }
+}
+
+$orders = getAllOrders();
+$partners = getAllPartners();
+$partnerTypes = getPartnerTypes();
+
+$editOrder = null;
+if ($action === 'edit' && isset($_GET['id'])) {
+    $editOrder = getOrderById($_GET['id']);
+    if (!$editOrder) {
+        $error = 'Заявка не найдена';
+        $action = 'list';
+    }
+}
+
+$orderProducts = null;
+$orderInfo = null;
+if ($action === 'products' && isset($_GET['id'])) {
+    $orderInfo = getOrderById($_GET['id']);
+    if ($orderInfo) {
+        $orderProducts = getOrderProducts($_GET['id']);
+    } else {
+        $error = 'Заявка не найдена';
+        $action = 'list';
+    }
+}
+?>
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Новые технологии - Заявки партнеров</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    font-family: 'Bahnschrift Light SemiCondensed', sans-serif;
+    background-color: #FFFFFF;
+    color: #333;
+    line-height: 1.6;
+    display: flex;
+}
+
+.sidebar {
+    width: 220px;
+    background-color: #0C4882;
+    color: white;
+    height: 100vh;
+    padding: 30px 20px;
+    position: fixed;
+}
+
+.sidebar h2 {
+    font-size: 18px;
+    margin-bottom: 30px;
+}
+
+.sidebar a {
+    display: block;
+    color: white;
+    text-decoration: none;
+    padding: 10px 15px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    background-color: #083662;
+}
+
+.sidebar a:hover {
+    background-color: #0a5ca6;
+}
+
+.main-content {
+    position: absolute;
+    margin-left: 240px;
+    width: calc(100% - 240px);
+    padding: 20px;
+}
+
+/* Все стили, которые раньше были в .container, теперь применимы к .main-content */
+.header {
+    background-color: #BBDCFA;
+    padding: 20px;
+    text-align: center;
+    margin-bottom: 30px;
+    border-radius: 10px;
+}
+
+.header h1 { color: #0C4882; margin-bottom: 10px; }
+
+.logo {
+    width: 150px;
+    height: 80px;
+    background-color: #0C4882;
+    margin: 10px auto;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+}
+
+.btn {
+    background-color: #0C4882;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    text-decoration: none;
+    display: inline-block;
+    margin: 5px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.btn:hover { background-color: #083662; }
+
+.btn-secondary {
+    background-color: #BBDCFA;
+    color: #0C4882;
+}
+
+.btn-secondary:hover { background-color: #a3cef7; }
+
+.message { padding: 15px; margin: 10px 0; border-radius: 5px; }
+
+.success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+th, td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+th {
+    background-color: #BBDCFA;
+    font-weight: 600;
+    color: #0C4882;
+}
+
+tr:hover { background-color: #f0f8ff; }
+
+.form-container {
+    background-color: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+    color: #0C4882;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 10px;
+    border: 2px solid #BBDCFA;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #0C4882;
+}
+
+.form-error {
+    color: #721c24;
+    font-size: 14px;
+    margin-top: 5px;
+}
+
+.status-new {
+    background-color: #fff3cd;
+    color: #856404;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.status-confirmed {
+    background-color: #cce5ff;
+    color: #004085;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.status-production {
+    background-color: #ffeaa7;
+    color: #636e72;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.status-completed {
+    background-color: #d4edda;
+    color: #155724;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.status-cancelled {
+    background-color: #f8d7da;
+    color: #721c24;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.navigation {
+    margin-bottom: 20px;
+}
+
+.back-link {
+    color: #0C4882;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.back-link:hover {
+    text-decoration: underline;
+}
+
+.cost-badge {
+    background-color: #0C4882;
+    color: white;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+@media (max-width: 768px) {
+    body { flex-direction: column; }
+
+    .sidebar {
+        position: relative;
+        width: 100%;
+        height: auto;
+    }
+
+    .main-content {
+        margin-left: 0;
+        width: 100%;
+    }
+}
+
+.img{
+    
+    width: 100px;
+    margin-left: 2.2em;
+}
+    </style>
+    </textarea>
+    </div>
+
+<br><br>
+
+ <div class="element">
+    <h1>Доп. материал 2</h1>
+    <textarea readonly>
+</head>
+<body>
+    <div class="container">
+        
+
+       
+    <div class="sidebar">
+    <img class="img" src="img/logo.ico" alt="">
+        <h2 style="margin-left: 2em; font-size: 25px; margin-bottom: 2px">Меню</h2>
+        <a href="index.php?action=add">Добавить заявку</a>
+        <a href="calculator.php">Калькулятор материалов</a>
+        <a href="index.php" >Список заявок</a>
+    </div>
+
+    <div class="main-content">
+       
+
+        <?php if ($message): ?>
+            <div class="message success"><?php echo htmlspecialchars($message); ?></div>
+        <?php endif; ?>
+
+        <?php if ($error): ?>
+            <div class="message error"><?php echo htmlspecialchars($error); ?></div>
+        <?php endif; ?>
+
+        <div class="navigation">
+            <?php if ($action !== 'list'): ?>
+              
+            <?php endif; ?>
+        </div>
+
+        <?php if ($action === 'list'): ?>
+            
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>№ заявки</th>
+                        <th>Партнер</th>
+                        <th>Тип партнера</th>
+                        <th>Дата заявки</th>
+                        <th>Стоимость</th>
+                        <th>Позиций</th>
+                        <th>Статус</th>
+                        <th>Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($orders as $order): ?>
+                        <tr>
+                            <td><strong><?php echo $order['id']; ?></strong></td>
+                            <td><?php echo htmlspecialchars($order['company_name']); ?></td>
+                            <td><?php echo htmlspecialchars($order['partner_type']); ?></td>
+                            <td><?php echo date('d.m.Y', strtotime($order['order_date'])); ?></td>
+                            <td>
+                                <span class="cost-badge"><?php echo number_format($order['total_cost'], 2); ?> ₽</span>
+                            </td>
+                            <td><?php echo $order['items_count']; ?></td>
+                            <td>
+                                <span class="status-<?php echo $order['status']; ?>">
+                                    <?php 
+                                    $statuses = ['new' => 'Новая', 'confirmed' => 'Подтверждена', 
+                                               'production' => 'В производстве', 'completed' => 'Выполнена', 
+                                               'cancelled' => 'Отменена'];
+                                    echo $statuses[$order['status']] ?? $order['status'];
+                                    ?>
+                                </span>
+                            </td>
+                            <td>
+                                <a href="index.php?action=edit&id=<?php echo $order['id']; ?>" class="btn" style="font-size: 12px;">Редактировать</a>
+                                <a href="index.php?action=products&id=<?php echo $order['id']; ?>" class="btn btn-secondary" style="font-size: 12px;">Продукция</a>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+
+        <?php elseif ($action === 'add' || $action === 'edit'): ?>
+            <div class="form-container">
+                <h2><?php echo $action === 'add' ? 'Добавить заявку' : 'Редактировать заявку'; ?></h2>
+                
+                <form method="POST">
+                    <?php if ($action === 'edit'): ?>
+                        <input type="hidden" name="id" value="<?php echo $editOrder['id']; ?>">
+                    <?php endif; ?>
+
+                    <div class="form-group">
+                        <label for="partner_id">Партнер *</label>
+                        <select name="partner_id" id="partner_id" required>
+                            <option value="">Выберите партнера</option>
+                            <?php foreach ($partners as $partner): ?>
+                                <option value="<?php echo $partner['id']; ?>" 
+                                        <?php echo ($editOrder['partner_id'] ?? '') == $partner['id'] ? 'selected' : ''; ?>>
+                                    <?php echo htmlspecialchars($partner['company_name']); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                        <?php if (isset($errors['partner_id'])): ?>
+                            <div class="form-error"><?php echo $errors['partner_id']; ?></div>
+                        <?php endif; ?>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="order_date">Дата заявки *</label>
+                        <input type="date" name="order_date" id="order_date" required
+                               value="<?php echo htmlspecialchars($editOrder['order_date'] ?? date('Y-m-d')); ?>">
+                        <?php if (isset($errors['order_date'])): ?>
+                            <div class="form-error"><?php echo $errors['order_date']; ?></div>
+                        <?php endif; ?>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="total_cost">Стоимость заявки *</label>
+                        <input type="number" name="total_cost" id="total_cost" step="0.01" min="0" required
+                               value="<?php echo htmlspecialchars($editOrder['total_cost'] ?? '0.00'); ?>">
+                        <?php if (isset($errors['total_cost'])): ?>
+                            <div class="form-error"><?php echo $errors['total_cost']; ?></div>
+                        <?php endif; ?>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="status">Статус заявки *</label>
+                        <select name="status" id="status" required>
+                            <option value="">Выберите статус</option>
+                            <option value="new" <?php echo ($editOrder['status'] ?? '') == 'new' ? 'selected' : ''; ?>>Новая</option>
+                            <option value="confirmed" <?php echo ($editOrder['status'] ?? '') == 'confirmed' ? 'selected' : ''; ?>>Подтверждена</option>
+                            <option value="production" <?php echo ($editOrder['status'] ?? '') == 'production' ? 'selected' : ''; ?>>В производстве</option>
+                            <option value="completed" <?php echo ($editOrder['status'] ?? '') == 'completed' ? 'selected' : ''; ?>>Выполнена</option>
+                            <option value="cancelled" <?php echo ($editOrder['status'] ?? '') == 'cancelled' ? 'selected' : ''; ?>>Отменена</option>
+                        </select>
+                        <?php if (isset($errors['status'])): ?>
+                            <div class="form-error"><?php echo $errors['status']; ?></div>
+                        <?php endif; ?>
+                    </div>
+
+                    <div style="text-align: center;">
+                        <a href="index.php" class="btn btn-secondary">Отмена</a>
+                        <button type="submit" name="<?php echo $action === 'add' ? 'add_order' : 'update_order'; ?>" class="btn">
+                            <?php echo $action === 'add' ? 'Добавить' : 'Сохранить'; ?>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+        <?php elseif ($action === 'products'): ?>
+            <div class="form-container">
+                <h2>Продукция в заявке № <?php echo $orderInfo['id']; ?></h2>
+                <p><strong>Партнер:</strong> <?php echo htmlspecialchars($orderInfo['company_name']); ?></p>
+                <p><strong>Дата заявки:</strong> <?php echo date('d.m.Y', strtotime($orderInfo['order_date'])); ?></p>
+                <p><strong>Общая стоимость:</strong> <?php echo number_format($orderInfo['total_cost'], 2); ?> ₽</p>
+                
+                <?php if (empty($orderProducts)): ?>
+                    <p>В данной заявке нет продукции.</p>
+                <?php else: ?>
+                    <table style="margin-top: 20px;">
+                        <thead>
+                            <tr>
+                                <th>Наименование продукции</th>
+                                <th>Тип продукции</th>
+                                <th>Количество</th>
+                                <th>Цена за единицу</th>
+                                <th>Общая стоимость</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($orderProducts as $product): ?>
+                                <tr>
+                                    <td><?php echo htmlspecialchars($product['product_name']); ?></td>
+                                    <td><?php echo htmlspecialchars($product['product_type']); ?></td>
+                                    <td><?php echo number_format($product['quantity']); ?></td>
+                                    <td><?php echo number_format($product['unit_price'], 2); ?> ₽</td>
+                                    <td><?php echo number_format($product['total_price'], 2); ?> ₽</td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                <?php endif; ?>
+            </div>
+
+        <?php endif; ?>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.querySelector('form');
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    const costInput = document.getElementById('total_cost');
+                    if (costInput) {
+                        const cost = parseFloat(costInput.value);
+                        if (cost < 0) {
+                            alert('Стоимость не может быть отрицательной');
+                            e.preventDefault();
+                            return false;
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
+    </textarea>
+    </div>
+
+<br><br>
+
+ <div class="element">
+    <h1>Пример 1</h1>
+    <textarea readonly>
+<?php
+require_once 'config.php';
+
+function getProductTypesWithCoeff() {
+    $conn = getConnection();
+    $sql = "SELECT id, type_name, coefficient FROM prod_types ORDER BY type_name";
+    $result = $conn->query($sql);
+    $types = array();
+    
+    if ($result && $result->num_rows > 0) {
+        while ($row = $result->fetch_assoc()) {
+            $types[] = $row;
+        }
+    }
+    
+    $conn->close();
+    return $types;
+}
+
+function getMaterialTypesWithDefect() {
+    $conn = getConnection();
+    $sql = "SELECT id, type_name, defect_percentage FROM mat_types ORDER BY type_name";
+    $result = $conn->query($sql);
+    $types = array();
+    
+    if ($result && $result->num_rows > 0) {
+        while ($row = $result->fetch_assoc()) {
+            $types[] = $row;
+        }
+    }
+    
+    $conn->close();
+    return $types;
+}
+
+$productTypes = getProductTypesWithCoeff();
+$materialTypes = getMaterialTypesWithDefect();
+
+$result = null;
+$error = '';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['calculate'])) {
+    $productTypeId = (int)$_POST['product_type'];
+    $materialTypeId = (int)$_POST['material_type'];
+    $requiredQuantity = (int)$_POST['required_quantity'];
+    $stockQuantity = (int)$_POST['stock_quantity'];
+    $param1 = (float)$_POST['param1'];
+    $param2 = (float)$_POST['param2'];
+    
+    if ($productTypeId <= 0) {
+        $error = 'Выберите корректный тип продукции';
+    } elseif ($materialTypeId <= 0) {
+        $error = 'Выберите корректный тип материала';
+    } elseif ($requiredQuantity <= 0) {
+        $error = 'Требуемое количество должно быть больше 0';
+    } elseif ($stockQuantity < 0) {
+        $error = 'Количество на складе не может быть отрицательным';
+    } elseif ($param1 <= 0 || $param2 <= 0) {
+        $error = 'Параметры должны быть больше 0';
+    } else {
+        $materialQuantity = calculateMaterialQuantity(
+            $productTypeId, 
+            $materialTypeId, 
+            $requiredQuantity, 
+            $stockQuantity, 
+            $param1, 
+            $param2
+        );
+        
+        if ($materialQuantity === -1) {
+            $error = 'Ошибка при расчете: проверьте корректность входных данных';
+        } else {
+            $productType = null;
+            $materialType = null;
+            
+            foreach ($productTypes as $pt) {
+                if ($pt['id'] == $productTypeId) {
+                    $productType = $pt;
+                    break;
+                }
+            }
+            
+            foreach ($materialTypes as $mt) {
+                if ($mt['id'] == $materialTypeId) {
+                    $materialType = $mt;
+                    break;
+                }
+            }
+            
+            if ($productType && $materialType) {
+                $coefficient = $productType['coefficient'];
+                $defectPercentage = $materialType['defect_percentage'];
+                
+                $needToProduce = max(0, $requiredQuantity - $stockQuantity);
+                $materialPerUnit = $param1 * $param2 * $coefficient;
+                $totalMaterialWithoutDefect = $materialPerUnit * $needToProduce;
+                $totalMaterialWithDefect = $totalMaterialWithoutDefect * (1 + $defectPercentage / 100);
+                
+                $result = [
+                    'quantity' => $materialQuantity,
+                    'details' => [
+                        'product_type' => $productType['type_name'],
+                        'material_type' => $materialType['type_name'],
+                        'coefficient' => $coefficient,
+                        'defect_percent' => $defectPercentage,
+                        'required_quantity' => $requiredQuantity,
+                        'stock_quantity' => $stockQuantity,
+                        'need_to_produce' => $needToProduce,
+                        'material_per_unit' => $materialPerUnit,
+                        'total_without_defect' => $totalMaterialWithoutDefect,
+                        'total_with_defect' => $totalMaterialWithDefect
+                    ]
+                ];
+            }
+        }
+    }
+}
+?>
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Калькулятор материалов - Новые технологии</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Bahnschrift Light SemiCondensed', 'Arial Narrow', sans-serif;
+            background-color: #FFFFFF;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background-color: #BBDCFA;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 30px;
+            border-radius: 10px;
+        }
+
+        .header h1 {
+            color: #0C4882;
+            margin-bottom: 10px;
+        }
+
+        .logo {
+            width: 150px;
+            height: 60px;
+            background-color: #0C4882;
+            margin: 10px auto;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .form-container {
+            position: absolute;
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #0C4882;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #BBDCFA;
+            border-radius: 5px;
+            font-size: 16px;
+            font-family: 'Bahnschrift Light SemiCondensed', sans-serif;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #0C4882;
+        }
+
+        .btn {
+            background-color: #0C4882;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin: 5px;
+            font-family: 'Bahnschrift Light SemiCondensed', sans-serif;
+        }
+
+        .btn:hover {
+            background-color: #083662;
+        }
+
+        .btn-secondary {
+            background-color: #BBDCFA;
+            color: #0C4882;
+        }
+
+        .btn-secondary:hover {
+            background-color: #a3cef7;
+        }
+
+        .result-container {
+            background-color: #BBDCFA;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .result-value {
+            font-size: 36px;
+            font-weight: bold;
+            color: #0C4882;
+            margin: 15px 0;
+        }
+
+        .result-details {
+            background-color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            text-align: left;
+        }
+
+        .result-details h4 {
+            color: #0C4882;
+            margin-bottom: 10px;
+        }
+
+        .result-details div {
+            margin-bottom: 5px;
+        }
+
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+
+        .back-link {
+            color: #0C4882;
+            text-decoration: none;
+            font-weight: bold;
+            margin-bottom: 20px;
+            display: inline-block;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .form-container {
+                padding: 20px;
+            }
+        }
+
+        .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 220px;
+    height: 100%;
+    background-color: #0C4882;
+    color: white;
+    padding-top: 60px;
+    font-family: 'Bahnschrift Light SemiCondensed', sans-serif;
+    z-index: 100;
+}
+
+.sidebar a {
+    display: block;
+    color: white;
+
+    text-decoration: none;
+  
+    border-radius: 5px;
+    background-color: #083662;
+    padding: 10px 15px;
+    margin-bottom: 10px;
+    margin-left: 20px;
+    margin-right: 20px;
+}
+
+.sidebar a:hover {
+    background-color: #083662;
+}
+
+.main-content {
+    
+    margin-left: 220px;
+    padding: 20px;
+}
+
+.img{
+    margin-top: -1.9em;
+    width: 100px;
+    margin-left: 3.5em;
+}
+    </style>
+    </textarea>
+    </div>
+
+<br><br>
+
+ <div class="element">
+    <h1>Доп. матриал 3</h1>
+    <textarea readonly>
+</head>
+<body>
+<div class="sidebar">
+
+<img class="img" src="img/logo.ico" alt="">
+<h2 style="margin-left: 2.8em; font-size: 25px">Меню</h2>
+        <a href="index.php?action=add">Добавить заявку</a>
+        <a href="calculator.php">Калькулятор материалов</a>
+        <a href="index.php" >Список заявок</a>
+
+</div>
+
+<div class="main-content">
+    <div class="container">
+       
+
+        <div class="form-container">
+            <h2>Параметры расчета</h2>
+            
+            <?php if ($error): ?>
+                <div class="error"><?php echo htmlspecialchars($error); ?></div>
+            <?php endif; ?>
+
+            <form method="POST">
+                <div class="form-group">
+                    <label for="product_type">Тип продукции</label>
+                    <select name="product_type" id="product_type" required>
+                        <option value="">Выберите тип продукции</option>
+                        <?php foreach ($productTypes as $type): ?>
+                            <option value="<?php echo $type['id']; ?>" <?php echo (($_POST['product_type'] ?? '') == $type['id']) ? 'selected' : ''; ?>>
+                                <?php echo htmlspecialchars($type['type_name']); ?> (коэф. <?php echo $type['coefficient']; ?>)
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="material_type">Тип материала</label>
+                    <select name="material_type" id="material_type" required>
+                        <option value="">Выберите тип материала</option>
+                        <?php foreach ($materialTypes as $type): ?>
+                            <option value="<?php echo $type['id']; ?>" <?php echo (($_POST['material_type'] ?? '') == $type['id']) ? 'selected' : ''; ?>>
+                                <?php echo htmlspecialchars($type['type_name']); ?> (брак <?php echo $type['defect_percentage']; ?>%)
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="required_quantity">Требуемое количество продукции</label>
+                    <input type="number" name="required_quantity" id="required_quantity" min="1" required 
+                           value="<?php echo htmlspecialchars($_POST['required_quantity'] ?? ''); ?>">
+                </div>
+
+                <div class="form-group">
+                    <label for="stock_quantity">Количество на складе</label>
+                    <input type="number" name="stock_quantity" id="stock_quantity" min="0" required 
+                           value="<?php echo htmlspecialchars($_POST['stock_quantity'] ?? '0'); ?>">
+                </div>
+
+                <div class="form-group">
+                    <label for="param1">Параметр 1 продукции</label>
+                    <input type="number" name="param1" id="param1" step="0.01" min="0.01" required 
+                           value="<?php echo htmlspecialchars($_POST['param1'] ?? ''); ?>">
+                </div>
+
+                <div class="form-group">
+                    <label for="param2">Параметр 2 продукции</label>
+                    <input type="number" name="param2" id="param2" step="0.01" min="0.01" required 
+                           value="<?php echo htmlspecialchars($_POST['param2'] ?? ''); ?>">
+                </div>
+
+                <div style="text-align: center;">
+                    <button type="submit" name="calculate" class="btn">Рассчитать количество материала</button>
+                    <button type="button" class="btn btn-secondary" onclick="resetForm()">Очистить форму</button>
+                </div>
+            </form>
+
+            <?php if ($result): ?>
+                <div class="result-container">
+                    <h3>Результат расчета</h3>
+                    <div class="result-value"><?php echo number_format($result['quantity']); ?></div>
+                    <p><strong>единиц материала требуется</strong></p>
+                    
+                    <div class="result-details">
+                        <h4>Детали расчета:</h4>
+                        <div><strong>Тип продукции:</strong> <?php echo htmlspecialchars($result['details']['product_type']); ?></div>
+                        <div><strong>Тип материала:</strong> <?php echo htmlspecialchars($result['details']['material_type']); ?></div>
+                        <div><strong>Коэффициент продукции:</strong> <?php echo $result['details']['coefficient']; ?></div>
+                        <div><strong>Процент брака материала:</strong> <?php echo $result['details']['defect_percent']; ?>%</div>
+                        <div><strong>Требуется продукции:</strong> <?php echo number_format($result['details']['required_quantity']); ?></div>
+                        <div><strong>На складе:</strong> <?php echo number_format($result['details']['stock_quantity']); ?></div>
+                        <div><strong>Нужно произвести:</strong> <?php echo number_format($result['details']['need_to_produce']); ?></div>
+                        <div><strong>Материал на единицу:</strong> <?php echo number_format($result['details']['material_per_unit'], 3); ?></div>
+                        <div><strong>Всего без брака:</strong> <?php echo number_format($result['details']['total_without_defect'], 2); ?></div>
+                        <div><strong>Всего с учетом брака:</strong> <?php echo number_format($result['details']['total_with_defect'], 2); ?></div>
+                    </div>
+                </div>
+            <?php endif; ?>
+        </div>
+        </div>
+    </div>
+
+    <script>
+        function resetForm() {
+            if (confirm('Очистить все поля формы?')) {
+                document.querySelector('form').reset();
+            }
+        }
+
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const requiredQuantity = document.getElementById('required_quantity').value;
+            const stockQuantity = document.getElementById('stock_quantity').value;
+            const param1 = document.getElementById('param1').value;
+            const param2 = document.getElementById('param2').value;
+            
+            if (requiredQuantity <= 0) {
+                alert('Требуемое количество должно быть больше 0');
+                e.preventDefault();
+                return;
+            }
+            
+            if (stockQuantity < 0) {
+                alert('Количество на складе не может быть отрицательным');
+                e.preventDefault();
+                return;
+            }
+            
+            if (param1 <= 0 || param2 <= 0) {
+                alert('Параметры должны быть больше 0');
+                e.preventDefault();
+                return;
+            }
+        });
+    </script>
+</body>
+</html>
+    </textarea>
+    </div>
+
+<br><br>
+
+
+ <div class="element">
+    <h1>Пример 2</h1>
+    <textarea readonly>
+<?php
+$dbHost = 'localhost';
+$dbUser = 'root';
+$dbPass = '';
+$dbName = 'myde';
+$port = 3309;
+function getConnection() {
+    global $dbHost, $dbUser, $dbPass, $dbName, $port;
+    
+    $conn = new mysqli($dbHost, $dbUser, $dbPass, $dbName, $port);
+    
+    if ($conn->connect_error) {
+        die("Ошибка подключения: " . $conn->connect_error);
+    }
+    
+    $conn->set_charset("utf8mb4");
+    return $conn;
+}
+
+function getAllOrders() {
+    $conn = getConnection();
+    
+    $sql = "SELECT 
+                o.id,
+                p.company_name,
+                pt.type_name as partner_type,
+                o.order_date,
+                o.total_cost,
+                o.status,
+                COUNT(oi.id) as items_count
+            FROM orders o
+            JOIN partners p ON o.partner_id = p.id
+            JOIN part_types pt ON p.partner_type_id = pt.id
+            LEFT JOIN order_items oi ON o.id = oi.order_id
+            GROUP BY o.id, p.company_name, pt.type_name, o.order_date, o.total_cost, o.status
+            ORDER BY o.order_date DESC";
+    
+    $result = $conn->query($sql);
+    $orders = array();
+    
+    if ($result && $result->num_rows > 0) {
+        while ($row = $result->fetch_assoc()) {
+            $orders[] = $row;
+        }
+    }
+    
+    $conn->close();
+    return $orders;
+}
+
+function getOrderById($id) {
+    $conn = getConnection();
+    
+    $id = (int)$id;
+    $sql = "SELECT o.*, p.company_name, p.director_name, p.email, p.phone, p.legal_address, p.rating,
+                   pt.type_name as partner_type_name, p.partner_type_id
+            FROM orders o 
+            JOIN partners p ON o.partner_id = p.id
+            JOIN part_types pt ON p.partner_type_id = pt.id
+            WHERE o.id = $id";
+    
+    $result = $conn->query($sql);
+    $order = null;
+    
+    if ($result && $result->num_rows > 0) {
+        $order = $result->fetch_assoc();
+    }
+    
+    $conn->close();
+    return $order;
+}
+
+function getAllPartners() {
+    $conn = getConnection();
+    
+    $sql = "SELECT p.*, pt.type_name as partner_type_name 
+            FROM partners p 
+            LEFT JOIN part_types pt ON p.partner_type_id = pt.id 
+            ORDER BY p.company_name";
+    
+    $result = $conn->query($sql);
+    $partners = array();
+    
+    if ($result && $result->num_rows > 0) {
+        while ($row = $result->fetch_assoc()) {
+            $partners[] = $row;
+        }
+    }
+    
+    $conn->close();
+    return $partners;
+}
+
+function getPartnerTypes() {
+    $conn = getConnection();
+    
+    $sql = "SELECT id, type_name FROM part_types ORDER BY type_name";
+    $result = $conn->query($sql);
+    $types = array();
+    
+    if ($result && $result->num_rows > 0) {
+        while ($row = $result->fetch_assoc()) {
+            $types[] = $row;
+        }
+    }
+    
+    $conn->close();
+    return $types;
+}
+
+function addOrder($data) {
+    $conn = getConnection();
+    
+    $partner_id = (int)$data['partner_id'];
+    $order_date = $conn->real_escape_string($data['order_date']);
+    $total_cost = (float)$data['total_cost'];
+    $status = $conn->real_escape_string($data['status']);
+    
+    $sql = "INSERT INTO orders (partner_id, order_date, total_cost, status) 
+            VALUES ($partner_id, '$order_date', $total_cost, '$status')";
+    
+    $result = $conn->query($sql);
+    $order_id = $conn->insert_id;
+    $conn->close();
+    
+    return $result ? $order_id : false;
+}
+
+function updateOrder($id, $data) {
+    $conn = getConnection();
+    
+    $id = (int)$id;
+    $partner_id = (int)$data['partner_id'];
+    $order_date = $conn->real_escape_string($data['order_date']);
+    $total_cost = (float)$data['total_cost'];
+    $status = $conn->real_escape_string($data['status']);
+    
+    $sql = "UPDATE orders 
+            SET partner_id = $partner_id,
+                order_date = '$order_date',
+                total_cost = $total_cost,
+                status = '$status'
+            WHERE id = $id";
+    
+    $result = $conn->query($sql);
+    $conn->close();
+    
+    return $result;
+}
+
+    </textarea>
+    </div>
+
+<br><br>
+
+<div class="element">
+    <h1>Доп. материал 4</h1>
+    <textarea readonly>
+function getOrderProducts($orderId) {
+    $conn = getConnection();
+    
+    $orderId = (int)$orderId;
+    $sql = "SELECT 
+                oi.id,
+                p.product_name,
+                pt.type_name as product_type,
+                oi.quantity,
+                oi.unit_price,
+                oi.total_price
+            FROM order_items oi
+            JOIN products p ON oi.product_id = p.id
+            JOIN prod_types pt ON p.product_type_id = pt.id
+            WHERE oi.order_id = $orderId
+            ORDER BY p.product_name";
+    
+    $result = $conn->query($sql);
+    $products = array();
+    
+    if ($result && $result->num_rows > 0) {
+        while ($row = $result->fetch_assoc()) {
+            $products[] = $row;
+        }
+    }
+    
+    $conn->close();
+    return $products;
+}
+
+function calculateOrderCost($orderId) {
+    $conn = getConnection();
+    
+    $orderId = (int)$orderId;
+    $sql = "SELECT COALESCE(SUM(total_price), 0) as total_cost
+            FROM order_items 
+            WHERE order_id = $orderId";
+    
+    $result = $conn->query($sql);
+    $totalCost = 0;
+    
+    if ($result && $result->num_rows > 0) {
+        $row = $result->fetch_assoc();
+        $totalCost = $row['total_cost'];
+    }
+    
+    $conn->close();
+    return $totalCost;
+}
+
+function validateOrder($data, $editId = null) {
+    $errors = array();
+    
+    if (empty($data['partner_id'])) {
+        $errors['partner_id'] = 'Выберите партнера';
+    }
+    
+    if (empty($data['order_date'])) {
+        $errors['order_date'] = 'Дата заявки обязательна';
+    }
+    
+    if (!is_numeric($data['total_cost']) || $data['total_cost'] < 0) {
+        $errors['total_cost'] = 'Стоимость должна быть положительным числом';
+    }
+    
+    if (empty($data['status'])) {
+        $errors['status'] = 'Выберите статус заявки';
+    }
+    
+    return $errors;
+}
+
+function calculateMaterialQuantity($productTypeId, $materialTypeId, $requiredQuantity, $stockQuantity, $param1, $param2) {
+    try {
+        $conn = getConnection();
+        
+        $stmt = $conn->prepare("SELECT coefficient FROM prod_types WHERE id = ?");
+        $stmt->bind_param("i", $productTypeId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $productType = $result->fetch_assoc();
+        
+        if (!$productType) {
+            $conn->close();
+            return -1;
+        }
+        
+        $stmt = $conn->prepare("SELECT defect_percentage FROM mat_types WHERE id = ?");
+        $stmt->bind_param("i", $materialTypeId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $materialType = $result->fetch_assoc();
+        
+        if (!$materialType) {
+            $conn->close();
+            return -1;
+        }
+        
+        $conn->close();
+        
+        if ($requiredQuantity <= 0 || $stockQuantity < 0 || $param1 <= 0 || $param2 <= 0) {
+            return -1;
+        }
+        
+        $coefficient = $productType['coefficient'];
+        $defectPercentage = $materialType['defect_percentage'];
+        
+        $needToProduce = max(0, $requiredQuantity - $stockQuantity);
+        
+        if ($needToProduce <= 0) {
+            return 0;
+        }
+        
+        $materialPerUnit = $param1 * $param2 * $coefficient;
+        $totalMaterial = $materialPerUnit * $needToProduce;
+        $totalWithDefect = $totalMaterial * (1 + $defectPercentage / 100);
+        
+        return (int)ceil($totalWithDefect);
+        
+    } catch (Exception $e) {
+        return -1;
+    }
+}
+
+function checkDatabaseStructure() {
+    $conn = getConnection();
+    
+    $tables = ['part_types', 'partners', 'prod_types', 'products', 'mat_types', 'orders', 'order_items'];
+    $missing = [];
+    
+    foreach ($tables as $table) {
+        $result = $conn->query("SHOW TABLES LIKE '$table'");
+        if (!$result || $result->num_rows == 0) {
+            $missing[] = $table;
+        }
+    }
+    
+    $conn->close();
+    return $missing;
+}
+?>
+    </textarea>
+    </div>
+
+<br><br>
